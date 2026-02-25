@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git config --global user.name)",
+      "Bash(git config --global user.email)",
+      "Bash(gh auth status)",
+      "Bash(git add -A)",
+      "Bash(git commit -m \"chore: initialize workspace with ProjectOps workflow docs:*)"
+    ]
+  }
+}
