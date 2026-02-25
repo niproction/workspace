@@ -1,0 +1,64 @@
+@import "tailwindcss";
+
+@theme {
+  --font-display: var(--font-cormorant), Georgia, serif;
+  --font-body: var(--font-inter), system-ui, sans-serif;
+
+  --color-ivory:    #faf7f2;
+  --color-cream:    #f0e6d8;
+  --color-blush:    #e8c4b0;
+  --color-rose:     #c9897a;
+  --color-sage:     #8fa68e;
+  --color-charcoal: #2c2c2c;
+  --color-muted:    #8a8380;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--color-ivory);
+  color: var(--color-charcoal);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Animations ───────────────────────────────────────────── */
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes tick {
+  0%   { transform: scale(1);    }
+  8%   { transform: scale(1.05); }
+  16%  { transform: scale(1);    }
+  100% { transform: scale(1);    }
+}
+
+@keyframes shimmer {
+  0%   { opacity: 0.6; }
+  50%  { opacity: 1;   }
+  100% { opacity: 0.6; }
+}
+
+.animate-fade-up  { animation: fadeUp 0.9s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.animate-fade-in  { animation: fadeIn 0.7s ease both; }
+.animate-tick     { animation: tick 1s ease; }
+.animate-shimmer  { animation: shimmer 2.5s ease-in-out infinite; }
+
+.delay-100 { animation-delay: 0.1s; }
+.delay-200 { animation-delay: 0.2s; }
+.delay-300 { animation-delay: 0.3s; }
+.delay-400 { animation-delay: 0.4s; }
+.delay-500 { animation-delay: 0.5s; }
+.delay-700 { animation-delay: 0.7s; }
+.delay-900 { animation-delay: 0.9s; }
