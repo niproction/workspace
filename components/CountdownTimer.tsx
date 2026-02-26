@@ -2,8 +2,6 @@
 
 import { useEffect, useState } from "react";
 
-const WEDDING_DATE = new Date("2026-07-08T00:00:00+03:00");
-
 interface TimeLeft {
   days: number;
   hours: number;
@@ -11,8 +9,8 @@ interface TimeLeft {
   seconds: number;
 }
 
-function getTimeLeft(): TimeLeft {
-  const diff = WEDDING_DATE.getTime() - Date.now();
+export function getTimeLeft(targetDate: Date): TimeLeft {
+  const diff = targetDate.getTime() - Date.now();
   if (diff <= 0) return { days: 0, hours: 0, minutes: 0, seconds: 0 };
   return {
     days:    Math.floor(diff / (1000 * 60 * 60 * 24)),
@@ -32,10 +30,6 @@ interface UnitProps {
   animDelay: string;
 }
 
-/**
- * Re-keying the inner span by `value` causes React to remount it each time
- * the number changes, restarting the CSS `tick` animation — no setState needed.
- */
 function CountdownUnit({ value, label, animDelay }: UnitProps) {
   return (
     <div
@@ -67,13 +61,20 @@ function CountdownUnit({ value, label, animDelay }: UnitProps) {
   );
 }
 
-export default function CountdownTimer() {
-  const [time, setTime] = useState<TimeLeft>(getTimeLeft);
+interface CountdownTimerProps {
+  /** ISO 8601 date string with timezone offset, e.g. "2026-07-08T18:00:00+03:00" */
+  targetDate: string;
+}
+
+export default function CountdownTimer({ targetDate }: CountdownTimerProps) {
+  const date = new Date(targetDate);
+  const [time, setTime] = useState<TimeLeft>(() => getTimeLeft(date));
 
   useEffect(() => {
-    const id = setInterval(() => setTime(getTimeLeft()), 1000);
+    const id = setInterval(() => setTime(getTimeLeft(date)), 1000);
     return () => clearInterval(id);
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [targetDate]);
 
   const units: UnitProps[] = [
     { value: time.days,    label: "days",    animDelay: "0.3s"  },
