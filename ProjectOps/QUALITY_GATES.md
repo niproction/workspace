@@ -1,31 +1,56 @@
 # Quality Gates
 
-## Gates Run Before Every PR
+> Run all gates locally before every push. Fix failures before continuing.
 
-These will be determined once the tech stack is established.
-Claude will update this file after the first feature is scoped.
+---
 
-### Template (fill in per stack)
+## This Project (Next.js + Vitest)
 
 ```bash
-# Install dependencies
-<package-manager> install
-
-# Run tests
-<test-command>
-
-# Lint
-<lint-command>
-
-# Format check
-<format-command>
-
-# Build
-<build-command>
+npm run lint     # ESLint — zero errors required
+npm run build    # Next.js build — must succeed
+npm test         # Vitest — all tests must pass
 ```
 
-## Current Status
+CI runs the same three commands automatically on every PR via `.github/workflows/ci.yml`.
 
-- Tech stack: **Not yet determined** (blank project)
-- CI: **Not configured** (no remote yet)
-- Test framework: **TBD**
+---
+
+## Gate Rules
+
+- Run in order: lint → build → test
+- A failing gate blocks the push — fix first, never skip
+- If a failure requires changing the implementation approach → STOP and discuss with user
+- If tests don't exist for new logic → add at least one unit test before pushing
+
+---
+
+## Generic Templates (other stacks)
+
+**Node / Express**
+```bash
+npm run lint
+npm run build
+npm test
+```
+
+**Python / FastAPI**
+```bash
+ruff check .
+mypy .
+pytest
+```
+
+**Go**
+```bash
+go vet ./...
+go build ./...
+go test ./...
+```
+
+**Rust**
+```bash
+cargo clippy
+cargo build --release
+cargo test
+```
