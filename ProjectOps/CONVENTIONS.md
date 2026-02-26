@@ -1,63 +1,32 @@
-# Project Conventions
+# Conventions
 
-> This file is project-specific. Update it whenever the stack or setup changes.
-> Claude reads this at the start of every session.
+> This file is NOT manually edited.
+> It is populated automatically by Claude during session detection (DETECTION.md).
+> Treat it as a read-only reference after a session starts.
 
 ---
 
-## Repository
+## How Conventions Are Determined
 
-| Key | Value |
-|-----|-------|
-| Remote | https://github.com/niproction/workspace |
-| Default branch | `main` |
-| Branch protection | PRs required, no force push |
-| Visibility | Public |
+| Convention | Source |
+|-----------|--------|
+| Git user / email | `git config user.name` + `git config user.email` |
+| Owner / repo name | Parsed from `git remote get-url origin` |
+| Default branch | `git symbolic-ref refs/remotes/origin/HEAD` or `git branch -a` |
+| Stack + framework | `package.json`, `requirements.txt`, `Cargo.toml`, `go.mod`, etc. |
+| Package manager | Presence of `package-lock.json` (npm), `yarn.lock`, `pnpm-lock.yaml`, `poetry.lock`, etc. |
+| Test runner | `devDependencies` in `package.json` or test config files |
+| Lint command | `scripts.lint` in `package.json` or stack default |
+| Build command | `scripts.build` in `package.json` or stack default |
+| Test command | `scripts.test` in `package.json` or stack default |
+| CI presence | `.github/workflows/` directory |
+| Token | `.gh_token` file in repo root |
 
-## Git Identity
-
-| Key | Value |
-|-----|-------|
-| user.name | niproction |
-| user.email | hanouka798@gmail.com |
-
-## GitHub CLI Auth
-
-- Token stored in: `.gh_token` (gitignored)
-- Usage pattern: `GH_TOKEN=$(cat .gh_token) gh <command>`
-- Scopes required: `repo`, `workflow`
-
-## Tech Stack
-
-| Layer | Technology |
-|-------|-----------|
-| Framework | Next.js 16 (App Router) |
-| Language | TypeScript |
-| Styling | Tailwind CSS v4 |
-| Testing | Vitest |
-| CI | GitHub Actions (`.github/workflows/ci.yml`) |
-| Package manager | npm |
-
-## Quality Gate Commands
-
-```bash
-npm run lint    # ESLint
-npm run build   # Next.js production build
-npm test        # Vitest (npm run test)
-```
-
-## Branching
-
-```
-main              ← stable, protected
-feature/<slug>    ← new features
-fix/<slug>        ← bug fixes
-chore/<slug>      ← tooling, deps, config, docs
-```
+---
 
 ## Commit Style
 
-Conventional Commits:
+Conventional Commits — always:
 ```
 feat(<scope>): description
 fix(<scope>): description
@@ -65,11 +34,19 @@ chore(<scope>): description
 fix(review): description
 ```
 
-## Project Context
+## Branching
 
-- **Type:** Wedding website
-- **Wedding date:** 08.07.2026 (July 8, 2026)
-- **Timezone:** IDT (Israel Daylight Time) = UTC+3 in summer
-- **Design:** Minimal, elegant, premium — no cheesy wedding clichés
-- **Palette:** ivory, cream, blush, rose, sage, charcoal
-- **Fonts:** Cormorant Garamond (display) + Inter (body)
+```
+<default-branch>   ← stable, protected (detected at session start)
+feature/<slug>     ← new features
+fix/<slug>         ← bug fixes
+chore/<slug>       ← tooling, config, docs
+```
+
+## PR Merge Strategy
+
+Squash merge — keeps default branch history clean.
+
+## Branch Deletion
+
+Always delete feature branches after merge — locally and remotely.
