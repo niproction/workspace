@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-const WEDDING_DATE = new Date("2026-07-08T12:00:00");
+const WEDDING_DATE = new Date("2026-07-08T00:00:00+03:00");
 
 interface TimeLeft {
   days: number;
