@@ -1,0 +1,141 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ── Singleton wedding configuration ─────────────────────────────────
+model WeddingConfig {
+  id            Int      @id @default(1)
+  groomNameHe   String   @default("ניסן חנוכה")
+  groomNameEn   String   @default("Nissan Hanouka")
+  brideNameHe   String   @default("רוני אזולאי")
+  brideNameEn   String   @default("Roni Azulay")
+  weddingDate   String   @default("2026-07-08")
+  ceremonyTime  String   @default("18:00")
+  receptionTime String   @default("")
+  timezone      String   @default("Asia/Jerusalem")
+  venueNameHe   String   @default("")
+  venueNameEn   String   @default("")
+  venueAddress  String   @default("")
+  venueWazeUrl  String   @default("")
+  venueMapsUrl  String   @default("")
+  rsvpDeadline  String   @default("")
+  mealOptions   String   @default("[\"בשר\",\"דגים\",\"צמחוני\"]")
+  faqContent    String   @default("[]")
+  updatedAt     DateTime @updatedAt
+}
+
+// ── Admin user ───────────────────────────────────────────────────────
+model AdminUser {
+  id           Int      @id @default(autoincrement())
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+}
+
+// ── Guests + RSVP ────────────────────────────────────────────────────
+model Guest {
+  id           Int       @id @default(autoincrement())
+  name         String
+  phone        String    @default("")
+  email        String    @default("")
+  side         String    @default("other")
+  attending    Boolean?
+  guestCount   Int       @default(1)
+  mealChoice   String    @default("")
+  allergies    String    @default("")
+  notes        String    @default("")
+  source       String    @default("rsvp")
+  isDuplicate  Boolean   @default(false)
+  mergedIntoId Int?
+  submittedAt  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+// ── Alcohol inventory ────────────────────────────────────────────────
+model AlcoholItem {
+  id           Int      @id @default(autoincrement())
+  category     String
+  name         String
+  volumeMl     Int      @default(750)
+  abv          Float    @default(0)
+  pricePerUnit Float    @default(0)
+  quantity     Int      @default(0)
+  lowStockAt   Int      @default(2)
+  status       String   @default("planned")
+  notes        String   @default("")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+// ── Vendors ──────────────────────────────────────────────────────────
+model Vendor {
+  id             Int                @id @default(autoincrement())
+  name           String
+  type           String             @default("other")
+  contactName    String             @default("")
+  phone          String             @default("")
+  email          String             @default("")
+  status         String             @default("not_contacted")
+  depositAmount  Float              @default(0)
+  depositPaid    Boolean            @default(false)
+  depositDueDate String             @default("")
+  finalAmount    Float              @default(0)
+  finalPaid      Boolean            @default(false)
+  finalDueDate   String             @default("")
+  notes          String             @default("")
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+  attachments    VendorAttachment[]
+}
+
+model VendorAttachment {
+  id           Int      @id @default(autoincrement())
+  vendorId     Int
+  vendor       Vendor   @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  filename     String
+  originalName String
+  mimeType     String
+  sizeBytes    Int
+  uploadedAt   DateTime @default(now())
+}
+
+// ── Budget ───────────────────────────────────────────────────────────
+model BudgetCategory {
+  id        Int          @id @default(autoincrement())
+  name      String
+  sortOrder Int          @default(0)
+  items     BudgetItem[]
+}
+
+model BudgetItem {
+  id          Int            @id @default(autoincrement())
+  categoryId  Int
+  category    BudgetCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  description String
+  planned     Float          @default(0)
+  actual      Float          @default(0)
+  paid        Boolean        @default(false)
+  notes       String         @default("")
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+}
+
+// ── Timeline / Checklist ─────────────────────────────────────────────
+model TimelineItem {
+  id        Int      @id @default(autoincrement())
+  time      String   @default("")
+  title     String
+  owner     String   @default("")
+  done      Boolean  @default(false)
+  category  String   @default("general")
+  notes     String   @default("")
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

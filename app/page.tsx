@@ -1,6 +1,19 @@
 import CountdownTimer from "@/components/CountdownTimer";
+import { buildWeddingDateISO, getWeddingConfig, toPublicConfig } from "@/lib/config";
+import Link from "next/link";
 
-export default function HomePage() {
+export const dynamic = "force-dynamic";
+
+export default async function HomePage() {
+  const raw = await getWeddingConfig();
+  const cfg = toPublicConfig(raw);
+  const weddingISO = buildWeddingDateISO(cfg);
+
+  const dateDisplay = (() => {
+    const [y, m, d] = cfg.weddingDate.split("-");
+    return `${d} · ${m} · ${y}`;
+  })();
+
   return (
     <main className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-6 py-20">
 
@@ -28,11 +41,12 @@ export default function HomePage() {
         {/* Names */}
         <div className="flex flex-col items-center gap-3">
           <h1
-            className="animate-fade-up text-6xl font-light italic leading-none tracking-wide text-[var(--color-charcoal)] delay-200
+            className="animate-fade-up text-5xl font-light italic leading-none tracking-wide text-[var(--color-charcoal)] delay-200
                        sm:text-7xl md:text-8xl lg:text-9xl"
             style={{ fontFamily: "var(--font-display)" }}
+            dir="rtl"
           >
-            Name &amp; Name
+            {cfg.groomNameHe} &amp; {cfg.brideNameHe}
           </h1>
 
           {/* Ornamental divider */}
@@ -53,7 +67,7 @@ export default function HomePage() {
                        sm:text-lg"
             style={{ fontFamily: "var(--font-body)" }}
           >
-            08 · 07 · 2026
+            {dateDisplay}
           </p>
         </div>
 
@@ -65,16 +79,33 @@ export default function HomePage() {
           >
             Counting down
           </p>
-          <CountdownTimer />
+          <CountdownTimer targetDate={weddingISO} />
         </div>
 
-        {/* Footer note */}
-        <p
-          className="animate-fade-up max-w-sm text-sm font-light leading-relaxed text-[var(--color-muted)] delay-900"
-          style={{ fontFamily: "var(--font-body)" }}
-        >
-          More details to follow soon.
-        </p>
+        {/* Nav links */}
+        <div className="animate-fade-up delay-700 flex flex-wrap justify-center gap-4">
+          <Link
+            href="/details"
+            className="rounded-full border border-[var(--color-blush)] px-6 py-2.5 text-sm text-[var(--color-charcoal)] transition hover:bg-[var(--color-blush)]/20"
+            style={{ fontFamily: "var(--font-body)" }}
+          >
+            Event Details
+          </Link>
+          <Link
+            href="/rsvp"
+            className="rounded-full bg-[var(--color-charcoal)] px-6 py-2.5 text-sm text-white transition hover:bg-[var(--color-rose)]"
+            style={{ fontFamily: "var(--font-body)" }}
+          >
+            RSVP
+          </Link>
+          <Link
+            href="/faq"
+            className="rounded-full border border-[var(--color-blush)] px-6 py-2.5 text-sm text-[var(--color-charcoal)] transition hover:bg-[var(--color-blush)]/20"
+            style={{ fontFamily: "var(--font-body)" }}
+          >
+            FAQ
+          </Link>
+        </div>
       </div>
     </main>
   );
