@@ -67,12 +67,14 @@ When the user gives a feature, present this and STOP:
 ```
 ## Plan: <feature name>
 
+**What this does:** <1-2 sentences. What the user sees/can do after this merges. Plain language.>
+
+**Changes:**
+- `<file>` — <what and why, one line>
+- `<file>` — <what and why, one line>
+
+**Risks:** <only if real, else omit>
 **Branch:** <type>/<slug>
-**Files impacted:** <list>
-**Acceptance criteria:**
-- <item>
-**Edge cases:** <list>
-**Risks:** <list>
 ```
 
 Wait for "Proceed" (or "yes" / "approved") before writing any code.
@@ -216,8 +218,9 @@ Only on explicit **"merge"** or **"Approved – merge"**:
 | No tokens in shell args | `GH_TOKEN=$(cat .gh_token)` only |
 | No secrets in commits | Never stage `.env`, `.gh_token`, credentials |
 | `.gh_token` gitignored | Check before every first push on a new repo |
-| No AI authorship | No "Co-authored-by: Claude" or similar |
+| No AI traces — anywhere | No "Co-authored-by: Claude", no "AI-generated", no "Generated with Claude Code" in commits, PR bodies, code comments, or any file |
 | Git author = repo owner | Detected via `git config user.name/email` |
+| Commit messages = human voice | Write as a developer would — no AI phrasing or structure |
 
 ---
 
