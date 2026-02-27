@@ -44,9 +44,8 @@ export default async function HomePage() {
             className="animate-fade-up text-5xl font-light italic leading-none tracking-wide text-[var(--color-charcoal)] delay-200
                        sm:text-7xl md:text-8xl lg:text-9xl"
             style={{ fontFamily: "var(--font-display)" }}
-            dir="rtl"
           >
-            {cfg.groomNameHe} &amp; {cfg.brideNameHe}
+            {cfg.brideNameEn} &amp; {cfg.groomNameEn}
           </h1>
 
           {/* Ornamental divider */}
