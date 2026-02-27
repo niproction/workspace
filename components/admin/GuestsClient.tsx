@@ -26,6 +26,178 @@ function Badge({ label, cls }: { label: string; cls: string }) {
   );
 }
 
+const EMPTY_GUEST_FORM = {
+  name: "",
+  phone: "",
+  email: "",
+  side: "other",
+  attending: null as boolean | null,
+  guestCount: 1,
+  mealChoice: "",
+  allergies: "",
+  notes: "",
+};
+
+function GuestFormFields({
+  form,
+  setForm,
+  mealOptions,
+  error,
+}: {
+  form: typeof EMPTY_GUEST_FORM;
+  setForm: (f: typeof EMPTY_GUEST_FORM) => void;
+  mealOptions: string[];
+  error: string;
+}) {
+  return (
+    <div className="p-5 space-y-4">
+      {error && <p className="text-sm text-red-600">{error}</p>}
+      {[
+        { label: "שם", key: "name", type: "text" },
+        { label: "טלפון", key: "phone", type: "tel" },
+        { label: "אימייל", key: "email", type: "email" },
+      ].map(({ label, key, type }) => (
+        <div key={key}>
+          <label className="block text-xs font-medium text-[var(--color-muted)] mb-1">{label}</label>
+          <input
+            type={type}
+            value={(form as Record<string, unknown>)[key] as string}
+            onChange={(e) => setForm({ ...form, [key]: e.target.value })}
+            className="w-full px-3 py-2 rounded-lg border border-stone-200 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-blush)]"
+          />
+        </div>
+      ))}
+      <div>
+        <label className="block text-xs font-medium text-[var(--color-muted)] mb-1">השתתפות</label>
+        <select
+          value={form.attending === null ? "null" : String(form.attending)}
+          onChange={(e) => setForm({ ...form, attending: e.target.value === "null" ? null : e.target.value === "true" })}
+          className="w-full px-3 py-2 rounded-lg border border-stone-200 text-sm focus:outline-none"
+        >
+          <option value="null">ממתין</option>
+          <option value="true">מגיע</option>
+          <option value="false">לא מגיע</option>
+        </select>
+      </div>
+      <div>
+        <label className="block text-xs font-medium text-[var(--color-muted)] mb-1">מספר אורחים</label>
+        <input
+          type="number"
+          min={1}
+          max={20}
+          value={form.guestCount}
+          onChange={(e) => setForm({ ...form, guestCount: parseInt(e.target.value, 10) || 1 })}
+          className="w-full px-3 py-2 rounded-lg border border-stone-200 text-sm focus:outline-none"
+        />
+      </div>
+      <div>
+        <label className="block text-xs font-medium text-[var(--color-muted)] mb-1">צד</label>
+        <select
+          value={form.side}
+          onChange={(e) => setForm({ ...form, side: e.target.value })}
+          className="w-full px-3 py-2 rounded-lg border border-stone-200 text-sm focus:outline-none"
+        >
+          <option value="groom">ניסן</option>
+          <option value="bride">רוני</option>
+          <option value="other">אחר</option>
+        </select>
+      </div>
+      {mealOptions.length > 0 && (
+        <div>
+          <label className="block text-xs font-medium text-[var(--color-muted)] mb-1">מנה</label>
+          <select
+            value={form.mealChoice}
+            onChange={(e) => setForm({ ...form, mealChoice: e.target.value })}
+            className="w-full px-3 py-2 rounded-lg border border-stone-200 text-sm focus:outline-none"
+          >
+            <option value="">לא נבחר</option>
+            {mealOptions.map((o) => <option key={o} value={o}>{o}</option>)}
+          </select>
+        </div>
+      )}
+      <div>
+        <label className="block text-xs font-medium text-[var(--color-muted)] mb-1">אלרגיות</label>
+        <input
+          type="text"
+          value={form.allergies}
+          onChange={(e) => setForm({ ...form, allergies: e.target.value })}
+          className="w-full px-3 py-2 rounded-lg border border-stone-200 text-sm focus:outline-none"
+        />
+      </div>
+      <div>
+        <label className="block text-xs font-medium text-[var(--color-muted)] mb-1">הערות</label>
+        <textarea
+          value={form.notes}
+          onChange={(e) => setForm({ ...form, notes: e.target.value })}
+          rows={2}
+          className="w-full px-3 py-2 rounded-lg border border-stone-200 text-sm focus:outline-none resize-none"
+        />
+      </div>
+    </div>
+  );
+}
+
+function AddModal({
+  mealOptions,
+  onClose,
+  onAdd,
+}: {
+  mealOptions: string[];
+  onClose: () => void;
+  onAdd: (guest: Guest) => void;
+}) {
+  const [form, setForm] = useState({ ...EMPTY_GUEST_FORM });
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+
+  async function handleSave() {
+    if (!form.name.trim()) { setError("שם הוא שדה חובה"); return; }
+    setSaving(true);
+    setError("");
+    try {
+      const res = await fetch("/api/guests", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      if (!res.ok) throw new Error("שגיאה בשמירה");
+      const created = await res.json();
+      onAdd(created);
+    } catch {
+      setError("שגיאה בשמירה. נסה שוב.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40" dir="rtl">
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between p-5 border-b border-stone-100">
+          <h3 className="font-display text-lg italic text-[var(--color-charcoal)]">הוספת אורח</h3>
+          <button onClick={onClose} className="text-[var(--color-muted)] hover:text-[var(--color-charcoal)] p-1">✕</button>
+        </div>
+        <GuestFormFields form={form} setForm={setForm} mealOptions={mealOptions} error={error} />
+        <div className="flex gap-3 p-5 border-t border-stone-100">
+          <button
+            onClick={onClose}
+            className="flex-1 py-2.5 rounded-lg border border-stone-200 text-sm text-[var(--color-charcoal)] hover:bg-stone-50 transition"
+          >
+            ביטול
+          </button>
+          <button
+            onClick={handleSave}
+            disabled={saving}
+            className="flex-1 py-2.5 rounded-lg bg-[var(--color-charcoal)] text-white text-sm font-medium hover:bg-[var(--color-rose)] transition disabled:opacity-50"
+          >
+            {saving ? "שומר..." : "הוסף"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function EditModal({
   guest,
   mealOptions,
@@ -77,96 +249,7 @@ function EditModal({
           <h3 className="font-display text-lg italic text-[var(--color-charcoal)]">עריכת אורח</h3>
           <button onClick={onClose} className="text-[var(--color-muted)] hover:text-[var(--color-charcoal)] p-1">✕</button>
         </div>
-        <div className="p-5 space-y-4">
-          {error && <p className="text-sm text-red-600">{error}</p>}
-          {[
-            { label: "שם", key: "name", type: "text" },
-            { label: "טלפון", key: "phone", type: "tel" },
-            { label: "אימייל", key: "email", type: "email" },
-          ].map(({ label, key, type }) => (
-            <div key={key}>
-              <label className="block text-xs font-medium text-[var(--color-muted)] mb-1">{label}</label>
-              <input
-                type={type}
-                value={(form as Record<string, unknown>)[key] as string}
-                onChange={(e) => setForm({ ...form, [key]: e.target.value })}
-                className="w-full px-3 py-2 rounded-lg border border-stone-200 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-blush)]"
-              />
-            </div>
-          ))}
-
-          <div>
-            <label className="block text-xs font-medium text-[var(--color-muted)] mb-1">השתתפות</label>
-            <select
-              value={form.attending === null ? "null" : String(form.attending)}
-              onChange={(e) => setForm({ ...form, attending: e.target.value === "null" ? null : e.target.value === "true" })}
-              className="w-full px-3 py-2 rounded-lg border border-stone-200 text-sm focus:outline-none"
-            >
-              <option value="null">ממתין</option>
-              <option value="true">מגיע</option>
-              <option value="false">לא מגיע</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-xs font-medium text-[var(--color-muted)] mb-1">מספר אורחים</label>
-            <input
-              type="number"
-              min={1}
-              max={20}
-              value={form.guestCount}
-              onChange={(e) => setForm({ ...form, guestCount: parseInt(e.target.value, 10) || 1 })}
-              className="w-full px-3 py-2 rounded-lg border border-stone-200 text-sm focus:outline-none"
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-medium text-[var(--color-muted)] mb-1">צד</label>
-            <select
-              value={form.side}
-              onChange={(e) => setForm({ ...form, side: e.target.value })}
-              className="w-full px-3 py-2 rounded-lg border border-stone-200 text-sm focus:outline-none"
-            >
-              <option value="groom">ניסן</option>
-              <option value="bride">רוני</option>
-              <option value="other">אחר</option>
-            </select>
-          </div>
-
-          {mealOptions.length > 0 && (
-            <div>
-              <label className="block text-xs font-medium text-[var(--color-muted)] mb-1">מנה</label>
-              <select
-                value={form.mealChoice}
-                onChange={(e) => setForm({ ...form, mealChoice: e.target.value })}
-                className="w-full px-3 py-2 rounded-lg border border-stone-200 text-sm focus:outline-none"
-              >
-                <option value="">לא נבחר</option>
-                {mealOptions.map((o) => <option key={o} value={o}>{o}</option>)}
-              </select>
-            </div>
-          )}
-
-          <div>
-            <label className="block text-xs font-medium text-[var(--color-muted)] mb-1">אלרגיות</label>
-            <input
-              type="text"
-              value={form.allergies}
-              onChange={(e) => setForm({ ...form, allergies: e.target.value })}
-              className="w-full px-3 py-2 rounded-lg border border-stone-200 text-sm focus:outline-none"
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-medium text-[var(--color-muted)] mb-1">הערות</label>
-            <textarea
-              value={form.notes}
-              onChange={(e) => setForm({ ...form, notes: e.target.value })}
-              rows={2}
-              className="w-full px-3 py-2 rounded-lg border border-stone-200 text-sm focus:outline-none resize-none"
-            />
-          </div>
-        </div>
+        <GuestFormFields form={form} setForm={setForm} mealOptions={mealOptions} error={error} />
         <div className="flex gap-3 p-5 border-t border-stone-100">
           <button
             onClick={onClose}
@@ -193,6 +276,7 @@ export default function GuestsClient({ initialGuests }: GuestsClientProps) {
   const [filterSide, setFilterSide] = useState("");
   const [filterAttending, setFilterAttending] = useState("");
   const [editGuest, setEditGuest] = useState<Guest | null>(null);
+  const [showAddModal, setShowAddModal] = useState(false);
   const [deleting, setDeleting] = useState<number | null>(null);
 
   const filtered = guests.filter((g) => {
@@ -222,13 +306,21 @@ export default function GuestsClient({ initialGuests }: GuestsClientProps) {
     <div dir="rtl" className="max-w-5xl mx-auto space-y-5">
       <div className="flex items-center justify-between">
         <h1 className="font-display text-2xl italic text-[var(--color-charcoal)]">אורחים</h1>
-        {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
-        <a
-          href="/api/guests/export"
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[var(--color-charcoal)] text-white text-sm hover:bg-[var(--color-rose)] transition"
-        >
-          ⬇ ייצוא CSV
-        </a>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="px-4 py-2 rounded-lg bg-[var(--color-charcoal)] text-white text-sm hover:bg-[var(--color-rose)] transition"
+          >
+            + הוסף אורח
+          </button>
+          {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
+          <a
+            href="/api/guests/export"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-stone-200 text-sm text-[var(--color-charcoal)] hover:bg-stone-50 transition"
+          >
+            ⬇ ייצוא CSV
+          </a>
+        </div>
       </div>
 
       {/* Filters */}
@@ -325,6 +417,17 @@ export default function GuestsClient({ initialGuests }: GuestsClientProps) {
           </div>
         )}
       </div>
+
+      {showAddModal && (
+        <AddModal
+          mealOptions={[]}
+          onClose={() => setShowAddModal(false)}
+          onAdd={(created) => {
+            setGuests((gs) => [created, ...gs]);
+            setShowAddModal(false);
+          }}
+        />
+      )}
 
       {editGuest && (
         <EditModal
