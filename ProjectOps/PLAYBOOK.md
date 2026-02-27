@@ -182,7 +182,18 @@ Only on explicit **"merge"** or **"Approved – merge"**:
    GH_TOKEN=$(cat .gh_token) gh api repos/<owner>/<repo>/commits/<sha>/check-runs \
      --jq '.check_runs[] | {name,status,conclusion}'
    ```
-2. Merge (squash):
+   - If `status` is not `completed` → wait and recheck. Never merge while CI is running.
+   - If `conclusion` is not `success` → do NOT merge. Report failure and stop.
+
+2. Check reviews and comments (always — do not skip, do not wait for user to ask):
+   ```bash
+   GH_TOKEN=$(cat .gh_token) gh api repos/<owner>/<repo>/pulls/<n>/reviews
+   GH_TOKEN=$(cat .gh_token) gh api repos/<owner>/<repo>/pulls/<n>/comments
+   ```
+   - If any unresolved comments or change-requests → summarize → **STOP. Do NOT merge.**
+   - If none → proceed.
+
+3. Merge (squash):
    ```bash
    GH_TOKEN=$(cat .gh_token) gh pr merge <n> --squash --subject "<title>" --body ""
    ```
