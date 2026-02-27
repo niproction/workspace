@@ -87,7 +87,31 @@ git status
 
 ---
 
-## 8. Open PRs
+## 8. Branch Protection (actual check — do not infer)
+
+Only run if `.gh_token` exists:
+
+```bash
+GH_TOKEN=$(cat .gh_token) gh api repos/<owner>/<repo>/branches/<default-branch>/protection 2>/dev/null
+```
+
+Parse the response for:
+- `required_status_checks` → present = CI enforced at GitHub level / null = CI advisory only
+- `required_pull_request_reviews` → present = PRs required / null = direct push to main allowed
+
+If the call returns 404 or fails → branch protection is **OFF**.
+
+Output one of:
+- `protected: CI enforced, PRs required` — fully hardened
+- `protected: PRs required, CI not enforced` — partial (soft CI)
+- `protected: CI enforced, no PR requirement` — partial
+- `unprotected` — no rules, main is exposed
+
+If unprotected or partial → flag it clearly in the detection summary and note: "run bootstrap checklist."
+
+---
+
+## 9. Open PRs
 
 ```bash
 GH_TOKEN=$(cat .gh_token) gh pr list
@@ -96,7 +120,7 @@ GH_TOKEN=$(cat .gh_token) gh pr list
 
 ---
 
-## 9. Detection Summary Output
+## 10. Detection Summary Output
 
 After detection, output exactly this block:
 
@@ -110,9 +134,9 @@ After detection, output exactly this block:
 - Quality gates: <lint command> → <build command> → <test command>
 - CI:            <present: filename> / <missing>
 - Token:         <.gh_token ✓ / missing>
-- Default branch: <main/master> (<protected / unprotected>)
+- Default branch: <main/master> (<protection status from step 8>)
 - Open PRs:      <none / list>
 - Status:        <Ready for features / Needs bootstrap>
 ```
 
-If anything is missing (no CI, no tests, no remote, no token) → say so clearly and propose what needs to be bootstrapped before features can begin.
+If anything is missing (no CI, no tests, no remote, no token, unprotected branch) → say so clearly and propose what needs to be bootstrapped before features can begin.
