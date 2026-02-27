@@ -1,7 +1,7 @@
 "use client";
 
 import { Vendor, VendorAttachment } from "@prisma/client";
-import { useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 
 type VendorWithAttachments = Vendor & { attachments: VendorAttachment[] };
 
@@ -218,8 +218,8 @@ export default function VendorsClient({ initialVendors }: { initialVendors: Vend
               </thead>
               <tbody className="divide-y divide-stone-50">
                 {vendors.map((vendor) => (
-                  <>
-                    <tr key={vendor.id} className="hover:bg-stone-50/50 transition">
+                  <React.Fragment key={vendor.id}>
+                    <tr className="hover:bg-stone-50/50 transition">
                       <td className="px-4 py-3 font-medium text-[var(--color-charcoal)]">{vendor.name}</td>
                       <td className="px-4 py-3 text-[var(--color-muted)]">{TYPE_LABELS[vendor.type] ?? vendor.type}</td>
                       <td className="px-4 py-3 text-[var(--color-muted)]">
@@ -274,7 +274,7 @@ export default function VendorsClient({ initialVendors }: { initialVendors: Vend
 
                     {/* Attachment panel */}
                     {expandedId === vendor.id && (
-                      <tr key={`${vendor.id}-attachments`}>
+                      <tr>
                         <td colSpan={7} className="px-4 py-3 bg-stone-50/70 border-t border-stone-100">
                           <div className="space-y-2">
                             <p className="text-xs font-semibold text-[var(--color-muted)] uppercase tracking-wider mb-2">
@@ -337,7 +337,7 @@ export default function VendorsClient({ initialVendors }: { initialVendors: Vend
                         </td>
                       </tr>
                     )}
-                  </>
+                  </React.Fragment>
                 ))}
               </tbody>
             </table>
