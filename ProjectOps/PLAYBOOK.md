@@ -28,9 +28,35 @@ Bootstrap only what is missing. Never re-add what already exists.
 | No test runner | Add vitest / jest / pytest / cargo test (match stack) |
 | No CI | Add `.github/workflows/ci.yml`: lint → build → test on `pull_request` |
 | No `.gh_token` | Tell user to add it (cannot be automated — requires their credentials) |
+| Branch unprotected | Enable branch protection after first push (see below) |
 
 Commit: `chore: bootstrap project`
-Push + open PR → **STOP**
+Push to default branch (first push only, before protection is active) → then immediately enable branch protection:
+
+```bash
+# Enable branch protection: require PRs + require CI to pass
+GH_TOKEN=$(cat .gh_token) gh api \
+  repos/<owner>/<repo>/branches/<default-branch>/protection \
+  --method PUT \
+  --input - <<'EOF'
+{
+  "required_status_checks": {
+    "strict": true,
+    "contexts": ["Lint / Build / Test"]
+  },
+  "enforce_admins": true,
+  "required_pull_request_reviews": {
+    "required_approving_review_count": 0
+  },
+  "restrictions": null
+}
+EOF
+```
+
+> Note: `contexts` must match the job name in `ci.yml` exactly.
+> After this runs, direct push to main is blocked and CI is enforced at GitHub level — not just by process.
+
+Then open PR for bootstrap commit → **STOP**
 
 ---
 
