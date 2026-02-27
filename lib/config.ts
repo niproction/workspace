@@ -10,7 +10,7 @@ export async function getWeddingConfig(): Promise<WeddingConfig> {
       groomNameHe: "ניסן חנוכה",
       groomNameEn: "Nissan Hanouka",
       brideNameHe: "רוני אזולאי",
-      brideNameEn: "Roni Azulay",
+      brideNameEn: "Roni Azullay",
       weddingDate: "2026-07-08",
       ceremonyTime: "18:00",
       receptionTime: "",
