@@ -39,7 +39,7 @@ export function guestsToCSV(guests: Guest[]): string {
     [
       String(g.id),
       g.name,
-      g.phone,
+      g.phone ? `\t${g.phone}` : "",
       g.email,
       formatSide(g.side),
       formatAttending(g.attending),
@@ -55,5 +55,6 @@ export function guestsToCSV(guests: Guest[]): string {
       .join(",")
   );
 
-  return [HEADERS.join(","), ...rows].join("\r\n");
+  // BOM ensures Excel opens the file as UTF-8 (required for Hebrew)
+  return "\uFEFF" + [HEADERS.join(","), ...rows].join("\r\n");
 }
