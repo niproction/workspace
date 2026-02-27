@@ -68,19 +68,21 @@ interface CountdownTimerProps {
 
 export default function CountdownTimer({ targetDate }: CountdownTimerProps) {
   const date = new Date(targetDate);
-  const [time, setTime] = useState<TimeLeft>(() => getTimeLeft(date));
+  const [time, setTime] = useState<TimeLeft | null>(null);
 
   useEffect(() => {
+    setTime(getTimeLeft(date));
     const id = setInterval(() => setTime(getTimeLeft(date)), 1000);
     return () => clearInterval(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [targetDate]);
 
+  const t = time ?? { days: 0, hours: 0, minutes: 0, seconds: 0 };
   const units: UnitProps[] = [
-    { value: time.days,    label: "days",    animDelay: "0.3s"  },
-    { value: time.hours,   label: "hours",   animDelay: "0.45s" },
-    { value: time.minutes, label: "minutes", animDelay: "0.6s"  },
-    { value: time.seconds, label: "seconds", animDelay: "0.75s" },
+    { value: t.days,    label: "days",    animDelay: "0.3s"  },
+    { value: t.hours,   label: "hours",   animDelay: "0.45s" },
+    { value: t.minutes, label: "minutes", animDelay: "0.6s"  },
+    { value: t.seconds, label: "seconds", animDelay: "0.75s" },
   ];
 
   return (
